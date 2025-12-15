@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OLXpro</title>
+
+<style>
+:root{
+  --bg:#e0e5ec;
+  --card:#e0e5ec;
+  --light:rgba(255,255,255,0.7);
+  --dark:rgba(163,177,198,0.6);
+  --primary:#4f46e5;
+  --text:#222;
+}
+body.dark{
+  --bg:#1f2235;
+  --card:#2b2f4a;
+  --light:rgba(60,60,80,0.6);
+  --dark:rgba(0,0,0,0.7);
+  --primary:#7f5af0;
+  --text:#f4f4f7;
+}
+body{
+  margin:0;
+  min-height:100vh;
+  background:var(--bg);
+  font-family:Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+  padding:30px 10px;
+  transition:.3s;
+}
+.container{
+  position:relative;
+  max-width:460px;
+  width:100%;
+  background:var(--card);
+  border-radius:26px;
+  padding:28px 24px;
+  box-shadow:10px 10px 22px var(--dark),
+             -10px -10px 22px var(--light);
+}
+h1{text-align:center;color:var(--text);margin-bottom:6px;}
+.subtitle{
+  text-align:center;
+  font-size:0.9rem;
+  color:var(--text);
+  opacity:.8;
+}
+label{margin-top:14px;display:block;font-weight:bold;color:var(--text);}
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:6px;
+  border-radius:16px;
+  border:none;
+  background:var(--card);
+  box-shadow:inset 6px 6px 10px var(--dark),
+             inset -6px -6px 10px var(--light);
+  font-size:1rem;
+  color:var(--text);
+}
+button{
+  width:100%;
+  margin-top:18px;
+  padding:12px;
+  border-radius:20px;
+  border:none;
+  background:var(--primary);
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:6px 6px 16px rgba(0,0,0,.35);
+}
+.result{
+  margin-top:12px;
+  padding:12px;
+  border-radius:16px;
+  background:var(--card);
+  box-shadow:6px 6px 14px var(--dark),
+             -6px -6px 14px var(--light);
+  font-weight:bold;
+  color:var(--text);
+}
+footer{
+  margin-top:22px;
+  text-align:center;
+  font-size:.9rem;
+  color:var(--text);
+}
+
+/* DARK TOGGLE INSIDE FRAME */
+#darkToggle{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  border:none;
+  background:var(--card);
+  box-shadow:6px 6px 14px var(--dark),
+             -6px -6px 14px var(--light);
+  font-size:20px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<button id="darkToggle">🌞</button>
+
+<h1>OLXpro</h1>
+<div class="subtitle">Professional Seller Intelligence</div>
+
+<label>Currency</label>
+<select id="currency">
+  <option value="₹">INR</option>
+  <option value="$">USD</option>
+  <option value="€">EUR</option>
+  <option value="£">GBP</option>
+</select>
+
+<label>Listed Price</label>
+<input id="listed" type="number" placeholder="Eg: 10000">
+
+<label>Buyer Offer</label>
+<input id="offer" type="number" placeholder="Eg: 8500">
+
+<label>Product Condition</label>
+<select id="condition">
+  <option value="1">Excellent</option>
+  <option value="0.9">Good</option>
+  <option value="0.8">Average</option>
+  <option value="0.65">Poor</option>
+</select>
+
+<label>Product Age (years)</label>
+<input id="age" type="number" value="1" min="0">
+
+<button id="analyzeBtn">Analyze Offer</button>
+<button onclick="resetAll()">Reset</button>
+
+<div class="result" id="priceResult"></div>
+<div class="result" id="rangeResult"></div>
+<div class="result" id="intentResult"></div>
+<div class="result" id="successResult"></div>
+<div class="result" id="confidenceResult"></div>
+<div class="result" id="fakeResult"></div>
+<div class="result" id="scamResult"></div>
+<div class="result" id="replyResult"></div>
+
+<footer>© Manik Roy 2025. All Rights Reserved.</footer>
+</div>
+
+<script>
+/* DARK MODE (STABLE) */
+const darkToggle=document.getElementById("darkToggle");
+if(localStorage.dark==="true"){
+  document.body.classList.add("dark");
+  darkToggle.textContent="🌙";
+}
+darkToggle.onclick=()=>{
+  document.body.classList.toggle("dark");
+  localStorage.dark=document.body.classList.contains("dark");
+  darkToggle.textContent=document.body.classList.contains("dark")?"🌙":"🌞";
+};
+
+/* ANALYSIS ENGINE */
+document.getElementById("analyzeBtn").onclick=analyzeOffer;
+
+function analyzeOffer(){
+  const listed=+listedInput.value;
+  const offer=+offerInput.value;
+  const condition=+conditionInput.value;
+  const age=Math.max(0,+ageInput.value);
+  const cur=currency.value;
+
+  if(!listed||!offer){alert("Please enter valid prices");return;}
+
+  const marketBase=listed*0.9;
+  const depreciationRate=0.88;
+  const ageFactor=Math.pow(depreciationRate,age);
+  const fairPrice=marketBase*ageFactor*condition;
+
+  const minAccept=fairPrice*0.8;
+  const ideal=fairPrice*0.95;
+
+  priceResult.innerHTML=`💰 Fair Market Price: ${cur}${fairPrice.toFixed(2)}`;
+  rangeResult.innerHTML=`📊 Smart Range: ${cur}${minAccept.toFixed(2)} – ${cur}${ideal.toFixed(2)}`;
+
+  const ratio=offer/fairPrice;
+
+  intentResult.innerHTML=`🎯 Buyer Intent: ${
+    ratio>=0.95?"🔥 Very High":
+    ratio>=0.85?"High":
+    ratio>=0.7?"Medium":"Low"
+  }`;
+
+  let success=(ratio*0.75+condition*0.25)*100;
+  success=Math.min(95,success);
+  successResult.innerHTML=`📈 Deal Success Probability: ${success.toFixed(1)}%`;
+
+  let confidence=(ratio*0.6+(offer>=minAccept?0.25:0)+condition*0.15)*100;
+  confidenceResult.innerHTML=`🧠 Confidence Score: ${confidence.toFixed(1)}%`;
+
+  fakeResult.innerHTML=ratio<0.35?"❌ Highly Likely Fake Offer":"✅ Offer Looks Genuine";
+  scamResult.innerHTML=ratio>=0.35&&ratio<0.55?"⚠️ Possible Scam / Time-Waster":"";
+
+  replyResult.innerHTML=`💬 Seller Action: ${
+    ratio>=0.95?"Accept immediately ✅":
+    ratio>=0.85?"Counter slightly 🔄":
+    ratio>=0.7?"Negotiate cautiously 🤝":
+    "Reject politely ❌"
+  }`;
+}
+
+/* RESET */
+function resetAll(){
+  listedInput.value="";
+  offerInput.value="";
+  ageInput.value=1;
+  conditionInput.value=1;
+  document.querySelectorAll(".result").forEach(r=>r.innerHTML="");
+}
+
+const listedInput=listed;
+const offerInput=offer;
+const conditionInput=condition;
+const ageInput=age;
+</script>
+
+</body>
+</html>
